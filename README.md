@@ -36,4 +36,3 @@ kubectl get svc
 kubectl get ingress
 kubectl get certificate
 curl -I https://testelchin.com
- 
