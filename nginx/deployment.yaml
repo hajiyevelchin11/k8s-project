@@ -13,13 +13,9 @@ spec:
       labels:
         app: nginx
     spec:
-      volumes:
-      - name: html
-        configMap:
-          name: nginx-html
       containers:
       - name: nginx
-        image: nginx:alpine
+        image: hajiyevelchin11/testelchin:v1
         ports:
         - containerPort: 80
         resources:
@@ -29,6 +25,3 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "200m"
-        volumeMounts:
-        - name: html
-          mountPath: /usr/share/nginx/html
