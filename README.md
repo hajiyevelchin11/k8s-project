@@ -1,6 +1,6 @@
 # Kubernetes Projects on k3s (Gcore Cloud)
 
-Production-grade Kubernetes deployments on a self-managed k3s cluster running on Gcore Cloud VM.
+Production-grade Kubernetes deployments on a self-managed k3s cluster running on Gcore Cloud VM (Amsterdam).
 
 ## Infrastructure
 
@@ -22,6 +22,8 @@ Components:
 - ClusterIP Service — internal load balancing
 - Traefik Ingress — domain routing
 - cert-manager ClusterIssuer — automatic SSL from Let's Encrypt
+- Custom Docker image — baked HTML, CSS, assets
+- Nginx custom config — caching headers, redirect handling
 
 Apply:
 kubectl apply -f nginx/deployment.yaml
@@ -30,9 +32,27 @@ kubectl apply -f nginx/clusterissuer.yaml
 kubectl apply -f nginx/ingress.yaml
 
 Verify:
-kubectl apply -f nginx/deployment.yaml
 kubectl get pods
 kubectl get svc
 kubectl get ingress
 kubectl get certificate
 curl -I https://testelchin.com
+
+## Nginx Configuration
+
+Custom nginx config baked into Docker image:
+- Cache-Control: public, max-age=3600 on home page
+- Cache-Control: public, max-age=86400 on universe page
+- absolute_redirect off — fixes redirect behind Traefik
+- www.testelchin.com + testelchin.com both handled
+
+Verify caching:
+curl -I https://testelchin.com
+curl -I https://cdn.testelchin.com
+
+Docker image versions:
+v1 - initial nginx deployment
+v2 - custom HTML pages (home + universe with galaxy background)
+v3 - nginx caching config added
+v4 - fixed redirect + www support
+
