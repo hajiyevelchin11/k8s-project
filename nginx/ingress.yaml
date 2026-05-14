@@ -10,9 +10,20 @@ spec:
   tls:
   - hosts:
     - testelchin.com
+    - www.testelchin.com
     secretName: testelchin-tls
   rules:
   - host: testelchin.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
+  - host: www.testelchin.com
     http:
       paths:
       - path: /
