@@ -1,6 +1,6 @@
 # Kubernetes Projects on k3s (Gcore Cloud)
 
-Production-grade Kubernetes deployments on a self-managed k3s cluster running on Gcore Cloud VM (Amsterdam).
+Kubernetes deployments on a self-managed k3s cluster running on Gcore Cloud VM.
 
 ## Infrastructure
 
@@ -11,48 +11,44 @@ SSL: cert-manager + Let's Encrypt
 
 ---
 
-## Project 1 — Nginx with SSL
+## Project 1 — Nginx as CDN Origin
 
-Live deployment of Nginx on Kubernetes with real domain and HTTPS.
+Live Nginx deployment on Kubernetes configured as origin for Gcore CDN.
 
-Live: https://testelchin.com
+Origin Live : https://testelchin.com
+CDN: https://cdn.testelchin.com
 
 Components:
 - Deployment — 2 replicas, resource requests and limits
 - ClusterIP Service — internal load balancing
-- Traefik Ingress — domain routing
-- cert-manager ClusterIssuer — automatic SSL from Let's Encrypt
-- Custom Docker image — baked HTML, CSS, assets
-- Nginx custom config — caching headers, redirect handling
+- Traefik Ingress — domain routing for testelchin.com and www.testelchin.com
+- cert-manager ClusterIssuer — automatic SSL from Let's Encrypt (SAN certificate)
+- Custom Docker image — baked HTML, CSS, images
+- Nginx custom config — caching, security headers, rate limiting, error pages
 
-Apply:
-kubectl apply -f nginx/deployment.yaml
-kubectl apply -f nginx/service.yaml
-kubectl apply -f nginx/clusterissuer.yaml
-kubectl apply -f nginx/ingress.yaml
+## Nginx Configuration (testelchin.com.conf)
 
-Verify:
-kubectl get pods
-kubectl get svc
-kubectl get ingress
-kubectl get certificate
-curl -I https://testelchin.com
+- Cache-Control: public, max-age=3600 — HTML pages
+- Cache-Control: public, max-age=86400 — universe page
+- Cache-Control: public, max-age=604800 — static assets (jpg, png, css, js)
+- Security headers: X-Frame-Options, X-Content-Type-Options, HSTS, X-Served-By
+- Rate limiting: 10 requests/second per IP, burst 20
+- Custom error pages: 404, 50x
+- absolute_redirect off — correct redirect behavior behind Traefik
 
-## Nginx Configuration
+## Site Structure
 
-Custom nginx config baked into Docker image:
-- Cache-Control: public, max-age=3600 on home page
-- Cache-Control: public, max-age=86400 on universe page
-- absolute_redirect off — fixes redirect behind Traefik
-- www.testelchin.com + testelchin.com both handled
+testelchin.com/                 — home page (Bezos quote)
+testelchin.com/universe/        — galaxy background page
+testelchin.com/dog.jpg          — test image
+testelchin.com/universe/cat.jpg — test image in subdirectory
 
-Verify caching:
-curl -I https://testelchin.com
-curl -I https://cdn.testelchin.com
+## Docker Image Versions
 
-Docker image versions:
 v1 - initial nginx deployment
 v2 - custom HTML pages (home + universe with galaxy background)
 v3 - nginx caching config added
 v4 - fixed redirect + www support
-
+v5 - production nginx config attempt (crashed — wrong config location)
+v6 - fixed config location, full production config
+v7 - added test images (dog.jpg, cat.jpg)
